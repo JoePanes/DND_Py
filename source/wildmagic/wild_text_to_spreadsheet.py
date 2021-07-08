@@ -37,13 +37,15 @@ while currentLine != "":
     currentLine = file.readline()
     
 with open(OUTPUT_PATH + currentFileName+".csv", "w") as optFile:
+    #Get field names
     fieldNames = list(currentEffect.keys())
     fieldNameDict = {}
     for currField in fieldNames:
         fieldNameDict[currField] = currField
 
     myWriter = csv.DictWriter(optFile, fieldNames)
-
+    
+    #Add field names to file
     myWriter.writerow(fieldNameDict)
 
     for newRow in effects:
