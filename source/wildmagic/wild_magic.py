@@ -1,9 +1,8 @@
 import csv
-
+from random import randint
 """
 
-2. Be able to randomly select one of the effects
-3. Be able to find one of the effects by entering a number
+
 4. Have a feature that keeps track of the effects that have been triggered
     4.1 Create a CSV file for it
     4.2 Have each row contain the date and time that this was selected
@@ -40,7 +39,38 @@ def readEffectsFile(fileName):
 
     return wildMagic, effectNo
 
+def randomlySelectEffect(effects, maxNo):
+    """
+    Provide a effect from the list
+
+    INPUTS:
+        :param effects: Dictionary, where the keys are Integers and all potential effects are Strings
+        :param maxNo: Integer, the number of the last effect
+    
+    OUTPUT:
+        returns nothing, but prints the effect
+    """
+    number = randint(1, maxNo)
+
+    print(f"{number} - {effects[number]}")
+
+def getEffect(effects, maxNo, desiredNo):
+    """
+    If valid, returns the effect of the specified number
+
+    INPUTS:
+        :param effects: Dictionary, where the keys are Integers and all potential effects are Strings
+        :param maxNo: Integer, the number of the last effect
+        :param desiredNo: Integer, the number to be returned
+    OUTPUT:
+        returns nothing, but prints the effect
+    """
+
+    if 1 <= desiredNo <= maxNo:
+        print(f"{desiredNo} - {effects[desiredNo]}")
+    else:
+        print("Invalid number, please check what you have entered")
+
 wildTable, maxNo = readEffectsFile(CURRENT_TABLE)
 
-print(wildTable)
-print(maxNo)
+getEffect(wildTable, maxNo, 100)
