@@ -30,7 +30,7 @@ def readEffectsFile(fileName):
     """ 
     wildMagic = {}
     effectNo = 0
-    with open(SPREADSHEET_PATH + fileName + ".csv", "r") as dataFile:
+    with open(SPREADSHEET_PATH + "wildmagic/" + fileName + ".csv", "r") as dataFile:
         myReader = csv.DictReader(dataFile)
 
         for row in myReader:
@@ -71,6 +71,20 @@ def getEffect(effects, maxNo, desiredNo):
     else:
         print("Invalid number, please check what you have entered")
 
+def saveOutcome(characterName, effectNo, effect):
+    """
+    After the retrival of an effect, save the effect to the corresponding character's spreadsheet
+
+    INPUTS:
+        :param characterName: String, the name of the character upon which the effect is being applied
+        :param effectNo: Integer, the corresponding number of the effect
+        :param effect: String, the description of what the effect does
+
+    OUTPUT:
+        returns nothing, but saves the effect to a csv
+    """
+
+    pass
 wildTable, maxNo = readEffectsFile(CURRENT_TABLE)
 
 getEffect(wildTable, maxNo, 100)

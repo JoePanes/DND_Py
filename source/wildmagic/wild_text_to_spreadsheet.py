@@ -36,7 +36,7 @@ while currentLine != "":
 
     currentLine = file.readline()
     
-with open(OUTPUT_PATH + currentFileName+".csv", "w") as optFile:
+with open(OUTPUT_PATH + "wildmagic/"+ currentFileName+".csv", "w") as optFile:
     #Get field names
     fieldNames = list(currentEffect.keys())
     fieldNameDict = {}
