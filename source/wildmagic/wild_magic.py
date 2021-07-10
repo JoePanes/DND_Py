@@ -1,17 +1,19 @@
 import csv
+import os
+
 from random import randint
+from datetime import datetime
+
 """
 
 
 4. Have a feature that keeps track of the effects that have been triggered
-    4.1 Create a CSV file for it
-    4.2 Have each row contain the date and time that this was selected
-    4.3 Store the number and effect, so that it is not dependent on looking elsewhere
+
     4.4 Give a prompt so that the characters name can be written, if it returns blank, ask for confirmation (with a second blank).
         4.4.1 If still blank, then don't add it to the csv
 
 """
-SPREADSHEET_PATH = "../../spreadsheets/"
+SPREADSHEET_PATH = "../../spreadsheets/wildmagic/"
 CURRENT_TABLE = "WildMagicEffects"
 
 def readEffectsFile(fileName):
@@ -30,7 +32,7 @@ def readEffectsFile(fileName):
     """ 
     wildMagic = {}
     effectNo = 0
-    with open(SPREADSHEET_PATH + "wildmagic/" + fileName + ".csv", "r") as dataFile:
+    with open(SPREADSHEET_PATH + fileName + ".csv", "r") as dataFile:
         myReader = csv.DictReader(dataFile)
 
         for row in myReader:
@@ -39,20 +41,21 @@ def readEffectsFile(fileName):
 
     return wildMagic, effectNo
 
-def randomlySelectEffect(effects, maxNo):
+def getNumber(maxNo):
     """
-    Provide a effect from the list
+    Provide a valid number within range
 
     INPUTS:
-        :param effects: Dictionary, where the keys are Integers and all potential effects are Strings
         :param maxNo: Integer, the number of the last effect
     
     OUTPUT:
-        returns nothing, but prints the effect
+        returns an Integer, within range of the effects table
     """
-    number = randint(1, maxNo)
-
-    print(f"{number} - {effects[number]}")
+    try:
+        number = randint(1, maxNo)
+    except:
+        print("Invalid max number provided, please check your effects spreadsheet is correct.")
+    return number
 
 def getEffect(effects, maxNo, desiredNo):
     """
@@ -68,8 +71,26 @@ def getEffect(effects, maxNo, desiredNo):
 
     if 1 <= desiredNo <= maxNo:
         print(f"{desiredNo} - {effects[desiredNo]}")
+        return effects[desiredNo]
     else:
         print("Invalid number, please check what you have entered")
+
+def randomlySelectEffect(effects, maxNo):
+    """
+    Provide an effect at random
+    
+    INPUTS:
+        :param effects: Dictionary, where the keys are Integers and all potential effects are Strings
+        :param maxNo: Integer, the number of the last effect
+    
+    OUTPUTS:
+        returns the effect number (Integer), and the effect description (String)
+    """
+
+    number = getNumber(maxNo)
+    effect = getEffect(effects, maxNo, number)
+
+    return number, effect
 
 def saveOutcome(characterName, effectNo, effect):
     """
@@ -83,8 +104,34 @@ def saveOutcome(characterName, effectNo, effect):
     OUTPUT:
         returns nothing, but saves the effect to a csv
     """
+    filePath = SPREADSHEET_PATH + "characters/" + characterName + ".csv"
 
-    pass
+    #Check whether file already exists
+    fileExists = False
+    if os.path.isfile(filePath):
+        fileExists = True
+
+    fieldNames = {
+        "number"    : "number", 
+        "effect"    : "effect", 
+        "date&time" : "date&time"
+        }
+
+    with open(filePath, "a") as dataFile:
+        myAppender = csv.DictWriter(dataFile, fieldNames)
+
+        if fileExists == False:
+            myAppender.writerow(fieldNames)
+
+        newRow = {
+            "number" : effectNo,
+            "effect" : effect,
+            "date&time" : datetime.now().strftime('%d_%m_%Y_%H_%M_%S'), 
+        }
+        myAppender.writerow(newRow)
+
 wildTable, maxNo = readEffectsFile(CURRENT_TABLE)
 
-getEffect(wildTable, maxNo, 100)
+for _ in range(100):
+    number, effect = randomlySelectEffect(wildTable, maxNo)
+    saveOutcome("test", number, effect)
