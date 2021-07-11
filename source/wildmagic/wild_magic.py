@@ -129,9 +129,3 @@ def saveOutcome(characterName, effectNo, effect):
             "date&time" : datetime.now().strftime('%d_%m_%Y_%H_%M_%S'), 
         }
         myAppender.writerow(newRow)
-
-wildTable, maxNo = readEffectsFile(CURRENT_TABLE)
-
-for _ in range(100):
-    number, effect = randomlySelectEffect(wildTable, maxNo)
-    saveOutcome("test", number, effect)
