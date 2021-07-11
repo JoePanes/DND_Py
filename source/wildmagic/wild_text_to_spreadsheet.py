@@ -4,12 +4,12 @@ INPUT_PATH = "../../text/"
 OUTPUT_PATH = "../../spreadsheets/"
 
 
-def converter(calledDirectly=True):
+def converter(calledFromParentFolder=True):
     """
     Takes in a .txt and converts it to a more usable .csv
     
     INPUTS:
-        :param calledFromMain: Boolean, whether this file is being used from a different folder
+        :param calledFromParentFolder: Boolean, whether the function is being called from one level above
     OUTPUT:
         returns nothing, but creates/modifies the spreadsheet at within 
                          the OUTPUT_PATH constant
@@ -19,7 +19,7 @@ def converter(calledDirectly=True):
     inputPath = INPUT_PATH
     outputPath = OUTPUT_PATH
 
-    if calledDirectly != True:
+    if calledFromParentFolder != True:
         inputPath = inputPath[3:]
         outputPath = outputPath [3:]
 

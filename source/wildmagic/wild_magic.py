@@ -4,19 +4,10 @@ import os
 from random import randint
 from datetime import datetime
 
-"""
-
-
-4. Have a feature that keeps track of the effects that have been triggered
-
-    4.4 Give a prompt so that the characters name can be written, if it returns blank, ask for confirmation (with a second blank).
-        4.4.1 If still blank, then don't add it to the csv
-
-"""
 SPREADSHEET_PATH = "../../spreadsheets/wildmagic/"
 CURRENT_TABLE = "WildMagicEffects"
 
-def readEffectsFile(fileName):
+def readEffectsFile(fileName, calledFromParentFolder=False):
     """
     Read in a CSV file, and prepares the data to be in an easy and quickly referenceable format.
 
@@ -25,14 +16,21 @@ def readEffectsFile(fileName):
     
     INPUT:
         :param fileName: String, the name of the file
+        :param calledFromParentFolder: Boolean, whether the function is being called from one level above
 
     OUTPUTS:
         returns, dictionary containing all effects and the number of the last effect
 
-    """ 
+    """
+    spreadsheetPath = ""
+    if calledFromParentFolder:
+        spreadsheetPath = SPREADSHEET_PATH[3:]
+    else:
+        spreadsheetPath = SPREADSHEET_PATH
+
     wildMagic = {}
     effectNo = 0
-    with open(SPREADSHEET_PATH + fileName + ".csv", "r") as dataFile:
+    with open(spreadsheetPath + fileName + ".csv", "r") as dataFile:
         myReader = csv.DictReader(dataFile)
 
         for row in myReader:
@@ -92,19 +90,30 @@ def randomlySelectEffect(effects, maxNo):
 
     return number, effect
 
-def saveOutcome(characterName, effectNo, effect):
+def saveOutcome(name, isCharacter, effectNo, effect, calledFromParentFolder=False):
     """
     After the retrival of an effect, save the effect to the corresponding character's spreadsheet
 
     INPUTS:
-        :param characterName: String, the name of the character upon which the effect is being applied
+        :param name: String, the name upon which the effect is being applied
+        :param isCharacter: Boolean, determine which folder to save it to
         :param effectNo: Integer, the corresponding number of the effect
         :param effect: String, the description of what the effect does
+        :param calledFromParentFolder: Boolean, whether the function is being called from one level above
 
     OUTPUT:
         returns nothing, but saves the effect to a csv
     """
-    filePath = SPREADSHEET_PATH + "characters/" + characterName + ".csv"
+    spreadsheetPath = ""
+    if calledFromParentFolder:
+        spreadsheetPath = SPREADSHEET_PATH[3:]
+    else:
+        spreadsheetPath = SPREADSHEET_PATH
+
+    if isCharacter:
+        filePath = spreadsheetPath + "characters/" + name + ".csv"
+    else:
+        filePath = spreadsheetPath + "worldandobjects/" + name + ".csv"
 
     #Check whether file already exists
     fileExists = False
