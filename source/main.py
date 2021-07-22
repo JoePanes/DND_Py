@@ -4,13 +4,6 @@ import wildmagic.wild_magic as wildTable
 
 from wildmagic.wild_text_to_spreadsheet import converter
 
-"""
-1. Store the names of player characters in a .csv
-    1.1 Use these player characters so that only a number (rather than a full name) needs to be typed to store effects that are effecting them
-2. For the default table, using the known split in categories of effects (effects caster, target, etc.) add useful information to help with determining who the effect should be applied to
-3. Since some effects, effect the world add a separate outcome category so that these can be noted
-
-"""
 
 def wildMagicMenu():
     """
@@ -22,6 +15,13 @@ def wildMagicMenu():
     OUTPUT:
         returns nothing
     """
+    targetEffectsDict = {
+        "o" : "objects",
+        "c" : "characters",
+        "a" : "areas",
+    }
+
+
     print("¬Wild Magic Menu")
     print("(1) Would you like to update the spreadsheet?")
     print("(2) Use the Wild Magic table?")
@@ -96,101 +96,150 @@ def wildMagicMenu():
                     effectNo = wildTable.getNumber(maxNo)
 
                 print("-----------------")
-                currEffect = wildTable.getEffect(effects, maxNo, effectNo)
+                effectText = wildTable.getEffect(effects, maxNo, effectNo)
 
                 categoryOfEffect, categoryOfEffectInteger = wildTable.getCategory(effectNo, True)
 
                 print(f"Type of Effect: {categoryOfEffect}")
 
-                print(f"{effectNo} - {currEffect}")
+                print(f"{effectNo} - {effectText}")
                 print("-----------------")
+                print("Would you like to save the result? [y]/n")
 
-                inp = input("Would you like to save the result? [y]/n")
+                inp = input("~ ")
 
                 if inp.lower() != "n":
-                    """
-                    Implement for categoryOfEffectInteger 3
-
-                    This needs to handle apply the effect to areas, ranging from the world or moon, to a small area. 
-                    Along with applying an effect to multiple people
-                    """
+                    noIterations = 1
+                    targetOfEffect = ""
 
                     #Based upon which category is in effect, it will require different manners of book keeping
                     if categoryOfEffectInteger == 1 or categoryOfEffectInteger == 2:
                         print("Who is the effect being applied to?")
-                        print("(C)haracter - default option")
+                        print("(C)haracter")
                         print("(O)bject (e.g. a building, chair, etc.)")
+                        validInput = False
+                        while validInput != True:
+                            inp = input("~ ")
+                        
+                            if inp.lower() == "c" or inp.lower() == "o": 
+                                validInput = True
+                                targetOfEffect = targetEffectsDict[inp]
+                            else:
+                                print("Invalid input, please try again")
+                            
+                        
+
+                    elif categoryOfEffectInteger == 3:
+                        print("Does the effect specify effecting specific people (not a general area or object)?")
+                        print("Type either:")
+                        print("(A)rea - Where it effects the world, settlement, or region in some way.")
+                        print("(O)bject - Where it effects an object (e.g. the next weapon to do...)")
+                        print("(C)haracter - Where it impacts one or more characters")
+
+                        targetOfEffect = ""
 
                         inp = input("~ ")
                         
-                        targetOfEffect = ""
-                        if inp.lower() == "o":
-                            targetOfEffect = "objects"
-                        else:
-                            targetOfEffect = "characters"
+                        while inp.lower() not in targetEffectsDict:
+                            print("Invalid input, please try again")
+                            inp = input("~ ")
 
-                        names = wildTable.readShortCuts(targetOfEffect, True)
+                        targetOfEffect = targetEffectsDict[inp]
 
-                        namesList = list(names.keys())
-
-                        print("After reading your shortcut folder...")
-                        print(names.keys())
-                        if len(namesList) > 0:
-                            print("I found the following options:")
-                            i = 1
-                            for currName in namesList:
-                                print(f"{i}) {currName}")
-
-                            print("Enter the corresponding number to quickly choose that name")
-                            print("Otherwise, type the name/descriptor of what you wish to save the effect to")
-                        else:
-                            print("I found nothing")
-                            print("Please enter a name or descriptor of what you wish to save the effect to")
                         
-                        validInput = False
-                        targetName = ""
-                        while validInput != True:
-                            targetName = input("~ ")
+                        if targetOfEffect.lower() == "characters" or targetOfEffect.lower() == "objects":
+                            print(f"How many noteworthy {targetOfEffect} affected by Wild Magic?")
+                            noIterations = ""
 
-                            print(f"you have written {targetName}, is this correct? y/[n]")
-
-                            confirmation = input("~ ")
-
-                            if confirmation.lower() == "y":
-                                validInput = True
-                        
-                        try:
-                            #Test whether the input is a shortcut
-                            shortcutNo = int(targetName)
-                            print(shortcutNo)
-                            targetName = namesList[shortcutNo-1]
-                        except:
-                            #Otherwise, this means it is a new string, therefore add it as a shortcut
-                            #However, just incase the written text is a duplicate of a pre-existing name, check if unique
-                            if targetName in names:
-                                i = 1
-                                isUnique = False
-                                newName = ""
-
-                                while isUnique != True:
-                                    newName = targetName + "_" + str(i)
-                                    i+= 1
-
-                                    if newName not in names:
-                                        isUnique = True
+                            while type(noIterations) != int:
+                                try:
+                                    noIterations = int(input("Enter number: "))
                                 
-                                targetName = newName
-                            
-                            wildTable.saveShortcut(targetOfEffect, targetName, True)
+                                except:
+                                    print("Invalid value, please enter any number")
 
-                        wildTable.saveOutcome(targetName, targetOfEffect, effectNo, currEffect, True)
-
-                        #
+                    else:
+                        print("ERROR")
+                        print("An unexpected value has been recieved for the category of effect")
+                        print("If you have made changes, then you need to specify how to handle this category")
+                        
+                    for _ in range(noIterations):
+                        saveEffect(effectNo, effectText, targetOfEffect)
                                
 
             elif inp == "3":
                 stop = True
 
+
+def saveEffect(effectNo, effectText, targetOfEffect):
+    """
+    After knowing what the target is, get further information so that it is saved as a .csv
+    Also, add the entered name as a shortcut option in later use.
+
+    INPUT:
+        :param effectNo: Integer, the number of the effect in the Wild Magic Table
+        :param effectText: String, the description of what the effect is
+        :param targetOfEffect: String, who is being effected by the magic
+
+    OUTPUT:
+        returns nothing, but saves to two .csv
+    """
+    names = wildTable.readShortCuts(targetOfEffect, True)
+
+    namesList = list(names.keys())
+
+    print("After reading your shortcut folder...")
+
+    if len(namesList) > 0:
+        print("I found the following options:")
+        i = 1
+        for currName in namesList:
+            print(f"\t{i}) {currName}")
+            i+= 1
+
+        print("Enter the corresponding number to quickly choose that name")
+        print("Otherwise, type the name/descriptor of what you wish to save the effect to")
+    else:
+        print("I found nothing")
+        print("Please enter a name or descriptor of what you wish to save the effect to")
+    
+    validInput = False
+    targetName = ""
+    while validInput != True:
+        targetName = input("~ ")
+
+        print(f"you have written {targetName}, is this correct? y/[n]")
+
+        confirmation = input("~ ")
+
+        if confirmation.lower() == "y":
+            validInput = True
+    
+    try:
+        #Test whether the input is a shortcut
+        shortcutNo = int(targetName)
+        print(shortcutNo)
+        targetName = namesList[shortcutNo-1]
+    except:
+        #Otherwise, this means it is a new string, therefore add it as a shortcut
+        #However, just incase the written text is a duplicate of a pre-existing name, check if unique
+        if targetName in names:
+            i = 1
+            isUnique = False
+            newName = ""
+
+            while isUnique != True:
+                newName = targetName + "_" + str(i)
+                i+= 1
+
+                if newName not in names:
+                    isUnique = True
+            
+            targetName = newName
+        
+        wildTable.saveShortcut(targetOfEffect, targetName, True)
+
+    wildTable.saveOutcome(targetName, targetOfEffect, effectNo, effectText, True)
 
 
 print("Hello, and welcome to my D&D program!")
