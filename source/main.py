@@ -71,7 +71,8 @@ def wildMagicMenu():
         
             print("(1) Select an effect")
             print("(2) Random effect")
-            print("(3) Exit")
+            print("(3) See effects applied to a character/object/area")
+            print("(4) Exit")
             
             inp = input("~ ")
             if inp == "1" or inp == "2":
@@ -113,7 +114,7 @@ def wildMagicMenu():
                     targetOfEffect = ""
 
                     #Based upon which category is in effect, it will require different manners of book keeping
-                    if categoryOfEffectInteger == 1 or categoryOfEffectInteger == 2:
+                    if usingDefault == True and (categoryOfEffectInteger == 1 or categoryOfEffectInteger == 2):
                         print("Who is the effect being applied to?")
                         print("(C)haracter")
                         print("(O)bject (e.g. a building, chair, etc.)")
@@ -129,7 +130,7 @@ def wildMagicMenu():
                             
                         
 
-                    elif categoryOfEffectInteger == 3:
+                    elif usingDefault == False or categoryOfEffectInteger == 3:
                         print("Does the effect specify effecting specific people (not a general area or object)?")
                         print("Type either:")
                         print("(A)rea - Where it effects the world, settlement, or region in some way.")
@@ -166,8 +167,72 @@ def wildMagicMenu():
                     for _ in range(noIterations):
                         saveEffect(effectNo, effectText, targetOfEffect)
                                
-
             elif inp == "3":
+                print("Which would you like to access?")
+                print("(A)rea")
+                print("(O)bject")
+                print("(C)haracter")
+                
+                inp = input("~ ")
+
+                if inp.lower() in targetEffectsDict:
+                    folder = targetEffectsDict[inp.lower()]
+
+                    csvFiles = wildTable.getEffectedFiles(folder, True)
+
+                    if len(csvFiles) == 0:
+                        print("Sorry, but no effects have been saved for this category.")
+                    
+                    else:
+                        print("Within the category, the following files were found:")
+                        i = 1
+
+                        for currFile in csvFiles:
+                            print(f"{i}) {currFile}")
+                            i += 1
+
+                        print("Which one would you like to see?")
+                        print("Please enter the corresponding number")
+                        validInput = False
+
+                        while validInput != True:
+                            fileNumber = takeInAndConfirmUserInput()
+
+                            try:
+                                fileNumber = int(fileNumber)
+                                validInput = True
+                            except:
+                                print("The value that you entered, was not a number, please try again")
+                        
+                        #Adjust for list indexs
+                        fileNumber -= 1
+                        fileName = csvFiles[fileNumber]
+
+                        fileContents = wildTable.getEffectedCSV(folder, fileName, True)
+                        print("")
+                        for currRow in fileContents:
+                            #Format the number so that it remains a consistent size
+                            formattedNumber = len(str(maxNo)) *["0"]
+
+                            splitNumber = [number for number in currRow["number"]]
+
+                            i = 1
+                            for currNumber in splitNumber[::-1]:
+                                formattedNumber[-i] = currNumber
+                                i+=1
+
+                            formattedNumber = "".join(formattedNumber)    
+                            
+                            date = currRow["date&time"]
+                            effect = currRow["effect"]
+
+                            print(f"{formattedNumber} | {date} | {effect}")
+                        print("")
+
+                else:
+                    print("Invalid input, only the options listed above are valid")
+
+            elif inp == "4":
                 stop = True
 
 
@@ -203,22 +268,11 @@ def saveEffect(effectNo, effectText, targetOfEffect):
         print("I found nothing")
         print("Please enter a name or descriptor of what you wish to save the effect to")
     
-    validInput = False
-    targetName = ""
-    while validInput != True:
-        targetName = input("~ ")
-
-        print(f"you have written {targetName}, is this correct? y/[n]")
-
-        confirmation = input("~ ")
-
-        if confirmation.lower() == "y":
-            validInput = True
+    targetName = takeInAndConfirmUserInput()
     
     try:
         #Test whether the input is a shortcut
         shortcutNo = int(targetName)
-        print(shortcutNo)
         targetName = namesList[shortcutNo-1]
     except:
         #Otherwise, this means it is a new string, therefore add it as a shortcut
@@ -241,6 +295,30 @@ def saveEffect(effectNo, effectText, targetOfEffect):
 
     wildTable.saveOutcome(targetName, targetOfEffect, effectNo, effectText, True)
 
+
+def takeInAndConfirmUserInput():
+    """
+    After taking in input from a user, confirm whether there are no mistakes
+
+    INPUT:
+        NONE
+    
+    OUTPUT:
+        returns a String, containing what the user wrote
+    """
+    validInput = False
+    userInput = ""
+    while validInput != True:
+        userInput = input("~ ")
+
+        print(f"you have written {userInput}, is this correct? y/[n]")
+
+        confirmation = input("~ ")
+
+        if confirmation.lower() == "y":
+            validInput = True
+
+    return userInput
 
 print("Hello, and welcome to my D&D program!")
 print("Please enter the bracketed character to select:")

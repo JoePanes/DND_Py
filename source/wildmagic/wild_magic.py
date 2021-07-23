@@ -103,7 +103,7 @@ def saveOutcome(name, targetOfEffect, effectNo, effect, calledFromParentFolder=F
     """
     spreadsheetPath = getSpreadsheetPath(calledFromParentFolder)
     
-    filePath = spreadsheetPath + "current_effects/" + targetOfEffect + "/" + name + ".csv"
+    filePath = spreadsheetPath + "applied_effects/" + targetOfEffect + "/" + name + ".csv"
     
     #Check whether file already exists
     fileExists = False
@@ -199,7 +199,7 @@ def getSpreadsheetPath(calledFromParentFolder):
     else:
         return SPREADSHEET_PATH
 
-def saveShortcut(fileName, targetName, calledFromParentFolder):
+def saveShortcut(fileName, targetName, calledFromParentFolder = False):
     """
     Add new strings to the corresponding shortcut file for ease of access
 
@@ -217,4 +217,56 @@ def saveShortcut(fileName, targetName, calledFromParentFolder):
         myAppender = csv.DictWriter(dataFile, ["name"])
         myAppender.writerow({"name":targetName})
 
-        
+def getEffectedFiles(folder, calledFromParentFolder = False):
+    """
+    Get the names of the .csv files within the specified folder
+
+    INPUT: 
+        :param folder: String, the name of the folder to look within
+        :param calledFromParentFolder: Boolean, whether the function is being called from one level above
+    
+    OUTPUT:
+        returns a List of Strings, containing each of the existing files
+    """
+
+
+    spreadsheetPath = getSpreadsheetPath(calledFromParentFolder)
+
+    files = os.listdir(spreadsheetPath + "applied_effects/" + folder + "/")
+
+    csvFiles = []
+
+    for currFileName in files:
+        if currFileName[-4:] == ".csv":
+            csvFiles.append(currFileName)
+
+    return csvFiles
+
+def getEffectedCSV(folder, fileName, calledFromParentFolder = False):
+    """
+    Retrieve the contents of the .csv
+
+    INPUTS:
+        :param folder: String, the name of the folder to access
+        :param fileName: String, the name of the .csv file
+        :param calledFromParentFolder: Boolean, whether the function is being called from one level above
+
+    OUTPUT:
+        returns a List of Dictionaries, containing the contents of the .csv
+    """
+
+    spreadsheetPath = getSpreadsheetPath(calledFromParentFolder)
+
+    csvContents = []
+    try:
+        with open(spreadsheetPath + "applied_effects/" + folder+ "/" + fileName, "r") as dataFile:
+            myReader = csv.DictReader(dataFile)
+
+
+            for row in myReader:
+                csvContents.append(row)
+    except:
+        print("While trying the read the .csv, and an error has occured.")
+        print("Chances are this occured, due to the file not existing.")
+
+    return csvContents
